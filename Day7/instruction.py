@@ -28,3 +28,6 @@ class Instruction:
     def __str__(self):
         input_list_str = ', '.join(self.op_inputs)
         return f"{self.op}({input_list_str}) -> {self.out_wire}"
+
+    def __repr__(self):
+        return str(self)

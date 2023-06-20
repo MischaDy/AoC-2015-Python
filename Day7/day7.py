@@ -7,9 +7,6 @@ PART = 1
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
 
-# TODO: Bug! Gate provides no signal until all its inputs have signals.
-#       --> diff approach needed!
-
 
 def main(run_test, part, test_input_path, input_path):
     file_path = test_input_path if run_test else input_path

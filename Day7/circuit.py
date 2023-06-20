@@ -19,6 +19,7 @@ class Circuit:
     def __init__(self, instrs: List[Instruction]):
         self.instrs = instrs
         self.wires = self.get_wires(instrs)
+        self.active_wires = set()
 
     @classmethod
     def get_wires(cls, instrs):
@@ -27,14 +28,19 @@ class Circuit:
             wires[instr.out_wire] = 0
             for in_wire in instr.get_in_wires():
                 wires[in_wire] = 0
-
         return wires
 
     def run(self):
-        for instr in self.instrs:
-            op = self.OP_DICT[instr.op]
-            inputs = map(self.inp_str_to_val, instr.op_inputs)
-            self.wires[instr.out_wire] = op(*inputs) % self.MAX_VALUE
+        self.init_values()
+
+        dyn_instrs = filter(lambda ins: ins.op != 'ID', self.instrs)
+        for instr in dyn_instrs:
+            inputs = set(map(self.inp_str_to_val, instr.op_inputs))
+            if self.active_wires.issuperset(inputs):
+                pass
+            self.wires[instr.out_wire] = instr.op(*inputs) % self.MAX_VALUE  # TODO: is mod correct??
+            in_wires = instr.get_in_wires()
+            self.active_wires.update(in_wires)
 
     def inp_str_to_val(self, op_input):
         if op_input.isdigit():
@@ -46,6 +52,14 @@ class Circuit:
 
     def __str__(self):
         return get_sorted_dict_str(self.wires)
+
+    def init_values(self):
+        fixed_val_instrs = filter(lambda ins: ins.op == 'ID', self.instrs)
+        for instr in fixed_val_instrs:
+            input_ = self.inp_str_to_val(instr.op_inputs)
+            self.wires[instr.out_wire] = input_ % self.MAX_VALUE  # TODO: is mod correct??
+            in_wires = instr.get_in_wires()
+            self.active_wires.update(in_wires)
 
 
 def get_sorted_dict_str(dict_):
