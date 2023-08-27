@@ -11,7 +11,7 @@ INPUT_PATH = 'input.txt'
 
 CHARS = chars
 STRAIGHTS = set(windowed(CHARS, 3))
-NEXT_CHAR_MAP = dict(zip(CHARS, CHARS[1:] + CHARS[0]))
+ILLEGAL_CHARS = 'iol'
 
 
 def main(run_test, part, test_input_path, input_path):
@@ -38,31 +38,52 @@ def get_input(file_path, line_sep=None):
     return input_
 
 
-def next_valid_password(password: list[str]):
+def next_valid_password(password: list[str], next_char_map):
+    if is_valid(password):
+        return password
+
+    # handle the case where the intial password contains illegal chars
+    password = next_password_legal_chars_only(password, next_char_map)
     while not is_valid(password):
-        password = increment(password)
+        password = increment(password, next_char_map)
     return password
+
+
+def next_password_legal_chars_only(password, next_char_map):
+    next_password = []
+    for ind, char in enumerate(password):
+        # todo: handle edge case of a/z being illegal char
+        if char in ILLEGAL_CHARS:
+            break
+        next_password.append(char)
+    else:
+        return increment(next_password, next_char_map)
+
+    next_char = next_char_map[char]
+    next_password.append(next_char)
+    next_password += ['a'] * (len(password) - ind - 1)
+    return next_password
 
 
 def is_valid(password: list[str]):
     return not has_illegal_char(password) and has_straight(password) and has_char_pairs(password)
 
 
-def increment(password: list[str]):
+def increment(password: list[str], next_char_map):
     # next_int = int(password, base=26) + 1
     first_non_z_inds = list(map(first, dropwhile(lambda p: last(p) == CHARS[-1],
                                                  always_reversible(enumerate(password)))))
     if not first_non_z_inds:
         return CHARS[0] * (len(password) + 1)
     first_non_z_ind = first_non_z_inds[0]
-    next_char = NEXT_CHAR_MAP[password[first_non_z_ind]]
+    next_char = next_char_map[password[first_non_z_ind]]
     postfix = ['a'] * (len(password) - first_non_z_ind - 1)
     next_password = password[:first_non_z_ind] + [next_char] + postfix
     return next_password
 
 
 def has_illegal_char(password):
-    for char in 'iol':
+    for char in ILLEGAL_CHARS:
         if char in password:
             return True
     return False
@@ -92,13 +113,26 @@ def find_char_pair_ind(password: list[str]):
             return ind
 
 
+def generate_next_char_map():
+    next_char_map = {}
+    val_chars = CHARS[1:] + CHARS[0]
+    for ind, key in enumerate(CHARS):
+        # prevent mapping to illegal chars
+        valid_vals = filter(lambda c: c not in ILLEGAL_CHARS, val_chars[ind:])
+        next_char_map[key] = first(valid_vals)
+    return next_char_map
+    # return {k: v for k, v in zip(CHARS, CHARS[1:] + CHARS[0] ) if v not in ILLEGAL_CHARS}
+
+
 def test():
+    next_char_map = generate_next_char_map()
+
     assert not is_valid(list('hijklmmn'))
     assert not is_valid(list('abbceffg'))
     assert not is_valid(list('abbcegjk'))
 
-    assert next_valid_password(list('abcdefgh')) == list('abcdffaa')
-    assert next_valid_password(list('ghijklmn')) == list('ghjaabcc')
+    assert next_valid_password(list('abcdefgh'), next_char_map) == list('abcdffaa')
+    assert next_valid_password(list('ghijklmn'), next_char_map) == list('ghjaabcc')
 
 
 if __name__ == '__main__':
