@@ -3,7 +3,7 @@ from collections import defaultdict
 from itertools import permutations, pairwise
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
@@ -45,7 +45,13 @@ def compute_change(arrangement, people_changes):
 
 
 def run_part2(input_):
-    pass
+    people_changes = build_people_changes_dict(input_)
+    for person in list(people_changes.keys()):
+        people_changes['I'][person] = 0
+        people_changes[person]['I'] = 0
+    arrangements = permutations(people_changes.keys())
+    changes = map(lambda a: compute_change(a, people_changes), arrangements)
+    return max(changes)
 
 
 def get_input(file_path, line_sep=None):
