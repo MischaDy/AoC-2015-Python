@@ -1,4 +1,6 @@
-RUN_TEST = True
+import re
+
+RUN_TEST = False
 PART = 1
 
 TEST_INPUT_PATH = 'test_input.txt'
@@ -13,7 +15,10 @@ def main(run_test, part, test_input_path, input_path):
 
 
 def run_part1(input_):
-    print(input_)
+    matches = re.finditer(r'(-?\d+)', input_)
+    num_strs = (m[0] for m in matches)
+    nums = map(int, num_strs)
+    return sum(nums)
 
 
 def run_part2(input_):
