@@ -1,9 +1,10 @@
+import json
 import re
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
-TEST_INPUT_PATH = 'test_input.txt'
+TEST_INPUT_PATH = 'test_input.txt' if PART == 1 else 'test_input2.txt'
 INPUT_PATH = 'input.txt'
 
 
@@ -21,8 +22,22 @@ def run_part1(input_):
     return sum(nums)
 
 
+def sum_no_red(data):
+    if isinstance(data, int):
+        return data
+    if isinstance(data, str):
+        return 0
+    if isinstance(data, list):
+        return sum(map(sum_no_red, data))
+    if isinstance(data, dict):
+        if 'red' in data.values():
+            return 0
+        return sum_no_red(list(data.keys())) + sum_no_red(list(data.values()))
+
+
 def run_part2(input_):
-    pass
+    data = json.loads(input_)
+    return sum_no_red(data)
 
 
 def get_input(file_path, line_sep=None):
