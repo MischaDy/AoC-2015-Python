@@ -1,6 +1,7 @@
-from string import ascii_lowercase as CHARS
-from more_itertools import windowed
+from itertools import dropwhile, pairwise
+from string import ascii_lowercase as chars
 
+from more_itertools import windowed, first, last, always_reversible
 
 RUN_TEST = True
 PART = 1
@@ -8,7 +9,9 @@ PART = 1
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
 
-STRAIGHTS = list(map(''.join, windowed(CHARS, 3)))
+CHARS = chars
+STRAIGHTS = list(windowed(CHARS, 3))
+NEXT_CHAR_MAP = dict(zip(CHARS, CHARS[1:] + CHARS[0]))
 
 
 def main(run_test, part, test_input_path, input_path):
@@ -35,19 +38,27 @@ def get_input(file_path, line_sep=None):
     return input_
 
 
-def next_valid_password(password):
+def next_valid_password(password: list[str]):
     while not is_valid(password):
         password = increment(password)
     return password
 
 
-def is_valid(password):
+def is_valid(password: list[str]):
     return not has_illegal_char(password) and has_straight(password) and has_char_pairs(password)
 
 
-def increment(password):
-    next_int = int(password, base=26) + 1
-
+def increment(password: list[str]):
+    # next_int = int(password, base=26) + 1
+    first_non_z_inds = list(map(first, dropwhile(lambda p: last(p) == CHARS[-1],
+                                                 always_reversible(enumerate(password)))))
+    if not first_non_z_inds:
+        return CHARS[0] * (len(password) + 1)
+    first_non_z_ind = first_non_z_inds[0]
+    next_char = NEXT_CHAR_MAP[password[first_non_z_ind]]
+    postfix = ['a'] * (len(password) - first_non_z_ind - 1)
+    next_password = password[:first_non_z_ind] + [next_char] + postfix
+    return next_password
 
 
 def has_illegal_char(password):
@@ -58,36 +69,37 @@ def has_illegal_char(password):
 
 
 def has_straight(password):
-    for straight in STRAIGHTS:
-        if straight in password:
-            return True
+    for window in windowed(password, 3):
+        for straight in STRAIGHTS:
+            if window == straight:
+                return True
     return False
 
 
-def has_char_pairs(password):
-    ind = find_char_pair(password)
-    if ind == -1:
+def has_char_pairs(password: list[str]):
+    ind = find_char_pair_ind(password)
+    if ind is None:
         return False
-    pw_slice = password[ind+2:]
-    return find_char_pair(pw_slice) != ind
+    password_rest = password[ind+2:]
+    return find_char_pair_ind(password_rest) is not None
 
 
-def find_char_pair(password):
-    for char in CHARS:
-        pair = 2 * char
-        ind = password.find(pair)
-        if ind != -1:
-            break
-    return ind
+def find_char_pair_ind(password: list[str]):
+    # pairs = dropwhile(lambda p: p[0] == p[1], pairwise(password))
+    # ind = first(pairs)[0]
+    # return ind
+    for ind, (c1, c2) in enumerate(pairwise(password)):
+        if c1 == c2:
+            return ind
 
 
 def test():
-    assert not is_valid('hijklmmn')
-    assert not is_valid('abbceffg')
-    assert not is_valid('abbcegjk')
+    assert not is_valid(list('hijklmmn'))
+    assert not is_valid(list('abbceffg'))
+    assert not is_valid(list('abbcegjk'))
 
-    assert next_valid_password('abbcegjk') == 'abcdffaa'
-    assert next_valid_password('ghijklmn') == 'ghjaabcc'
+    assert next_valid_password(list('abcdefgh')) == list('abcdffaa')
+    assert next_valid_password(list('ghijklmn')) == list('ghjaabcc')
 
 
 if __name__ == '__main__':
