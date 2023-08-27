@@ -10,7 +10,7 @@ TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
 
 CHARS = chars
-STRAIGHTS = list(windowed(CHARS, 3))
+STRAIGHTS = set(windowed(CHARS, 3))
 NEXT_CHAR_MAP = dict(zip(CHARS, CHARS[1:] + CHARS[0]))
 
 
@@ -70,9 +70,8 @@ def has_illegal_char(password):
 
 def has_straight(password):
     for window in windowed(password, 3):
-        for straight in STRAIGHTS:
-            if window == straight:
-                return True
+        if window in STRAIGHTS:
+            return True
     return False
 
 
