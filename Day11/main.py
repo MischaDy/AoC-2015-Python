@@ -26,7 +26,7 @@ def main(run_test, part, test_input_path, input_path):
 
 def run_part1(input_):
     password = list(input_)
-    next_password = next_valid_password(password, NEXT_CHAR_MAP)
+    next_password = next_valid_password(password)
     return ''.join(next_password)
 
 
@@ -46,18 +46,18 @@ def get_input(file_path, line_sep=None):
     return input_
 
 
-def next_valid_password(password: list[str], NEXT_CHAR_MAP):
+def next_valid_password(password: list[str]):
     if is_valid(password):
         return password
 
     # handle the case where the intial password contains illegal chars
-    password = next_password_legal_chars_only(password, NEXT_CHAR_MAP)
+    password = next_password_legal_chars_only(password)
     while not is_valid(password):
-        password = increment(password, NEXT_CHAR_MAP)
+        password = increment(password)
     return password
 
 
-def next_password_legal_chars_only(password, NEXT_CHAR_MAP):
+def next_password_legal_chars_only(password):
     next_password = []
     for ind, char in enumerate(password):
         # todo: handle edge case of a/z being illegal char
@@ -65,7 +65,7 @@ def next_password_legal_chars_only(password, NEXT_CHAR_MAP):
             break
         next_password.append(char)
     else:
-        return increment(next_password, NEXT_CHAR_MAP)
+        return increment(next_password)
 
     next_char = NEXT_CHAR_MAP[char]
     next_password.append(next_char)
@@ -126,8 +126,8 @@ def test():
     assert not is_valid(list('abbceffg'))
     assert not is_valid(list('abbcegjk'))
 
-    assert next_valid_password(list('abcdefgh'), NEXT_CHAR_MAP) == list('abcdffaa')
-    assert next_valid_password(list('ghijklmn'), NEXT_CHAR_MAP) == list('ghjaabcc')
+    assert next_valid_password(list('abcdefgh')) == list('abcdffaa')
+    assert next_valid_password(list('ghijklmn')) == list('ghjaabcc')
 
 
 if __name__ == '__main__':
