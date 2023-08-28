@@ -1,3 +1,5 @@
+import re
+
 RUN_TEST = True
 PART = 1
 
@@ -13,6 +15,25 @@ def main(run_test, part, test_input_path, input_path):
 
 
 def run_part1(input_):
+    duration = 2503
+    reindeer = get_reindeer(input_)
+    reindeer_pos = race(reindeer, duration)
+    print(reindeer_pos)
+    max_dist = max(reindeer_pos.values())
+    return max_dist
+
+
+def get_reindeer(input_):
+    reindeer = {}
+    for line in input_:
+        name = line.split(' ')[0]
+        fly_speed, fly_duration = re.search(r'(\d+) km/s for (\d+) seconds', line).groups()
+        rest_duration = re.search(r'rest for (\d+) seconds', line).groups()[0]
+        reindeer[name] = list(map(int, (fly_speed, fly_duration, rest_duration)))
+    return reindeer
+
+
+def race(reindeer, duration):
     pass
 
 
