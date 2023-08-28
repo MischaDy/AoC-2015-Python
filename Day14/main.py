@@ -50,8 +50,8 @@ def run_part2(input_):
     duration = 1000 if RUN_TEST else 2503
     reindeer = get_reindeer(input_)
     reindeer_pos, reindeer_points = race_with_points(reindeer, duration)
-    reindeer_pos_gt = race(reindeer, duration)
-    print('Correct?', reindeer_pos == reindeer_pos_gt)
+    # reindeer_pos_gt = race(reindeer, duration)
+    # print('Correct?', reindeer_pos == reindeer_pos_gt)
     max_points = max(reindeer_points.values())
     return max_points
 
@@ -65,17 +65,19 @@ def race_with_points(reindeer_dict, duration):
     for t in range(1, duration+1):
         for reindeer, (fly_speed, fly_duration, rest_duration) in reindeer_dict.items():
             state = reindeer_states[reindeer]
-            state[1] -= 1
             if state[1] <= 0:
+                # no time in old state left ==> determine new state
                 state = ['rest', rest_duration] if state[0] == 'fly' else ['fly', fly_duration]
                 reindeer_states[reindeer] = state
             if state[0] == 'fly':
                 reindeer_pos[reindeer] += fly_speed
+            # 1 second in current/new state has passed
+            state[1] -= 1
         max_dist = max(reindeer_pos.values())
         for reindeer, pos in reindeer_pos.items():
             if pos == max_dist:
                 reindeer_points[reindeer] += 1
-        print(f'{t} -- {dict(reindeer_pos)}, {dict(reindeer_states)}')
+        # print(f'{t} -- {dict(reindeer_pos)}, {dict(reindeer_states)}')
     return reindeer_pos, reindeer_points
 
 
