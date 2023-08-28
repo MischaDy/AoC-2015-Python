@@ -1,7 +1,8 @@
 import re
+from collections import defaultdict
 
-RUN_TEST = False
-PART = 1
+RUN_TEST = True
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
@@ -45,7 +46,36 @@ def race(reindeer_dict, duration):
 
 
 def run_part2(input_):
-    pass
+    duration = 1000 if RUN_TEST else 2503
+    reindeer = get_reindeer(input_)
+    reindeer_points = race_with_points(reindeer, duration)
+    max_points = max(reindeer_points.values())
+    return max_points
+
+
+def race_with_points(reindeer_dict, duration):
+    reindeer_pos = defaultdict(lambda: 0)
+    reindeer_points = defaultdict(lambda: 0)
+    reindeer_states = {reindeer: ['fly', fly_duration]
+                       for reindeer, (_, fly_duration, _) in reindeer_dict.items()}
+    for t in range(1, duration+1):
+        for reindeer, (fly_speed, fly_duration, rest_duration) in reindeer_dict.items():
+            state = reindeer_states[reindeer]
+            if state[1] > 0:
+                state[1] -= 1
+                if state[0] == 'fly':
+                    reindeer_pos[reindeer] += fly_speed
+            else:
+                if state[0] == 'fly':
+                    new_state = ['rest', rest_duration]
+                else:
+                    new_state = ['fly', fly_duration]
+                reindeer_states[reindeer] = new_state
+        max_dist = max(reindeer_pos.values())
+        for reindeer, pos in reindeer_pos.items():
+            if pos == max_dist:
+                reindeer_points[reindeer] += 1
+    return reindeer_points
 
 
 def get_input(file_path, line_sep=None):
