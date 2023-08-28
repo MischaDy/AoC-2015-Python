@@ -1,6 +1,6 @@
 import re
 
-RUN_TEST = True
+RUN_TEST = False
 PART = 1
 
 TEST_INPUT_PATH = 'test_input.txt'
@@ -15,10 +15,9 @@ def main(run_test, part, test_input_path, input_path):
 
 
 def run_part1(input_):
-    duration = 2503
+    duration = 1000 if RUN_TEST else 2503
     reindeer = get_reindeer(input_)
     reindeer_pos = race(reindeer, duration)
-    print(reindeer_pos)
     max_dist = max(reindeer_pos.values())
     return max_dist
 
@@ -33,8 +32,16 @@ def get_reindeer(input_):
     return reindeer
 
 
-def race(reindeer, duration):
-    pass
+def race(reindeer_dict, duration):
+    reindeer_pos = {}
+    for reindeer, (fly_speed, fly_duration, rest_duration) in reindeer_dict.items():
+        dist_single = fly_speed * fly_duration
+        time = fly_duration + rest_duration
+        time_full, time_partial = divmod(duration, time)
+        dist_total = time_full * dist_single
+        dist_total += fly_speed * min(time_partial, fly_duration)
+        reindeer_pos[reindeer] = dist_total
+    return reindeer_pos
 
 
 def run_part2(input_):
