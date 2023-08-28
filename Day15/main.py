@@ -1,4 +1,8 @@
+import re
+from collections import defaultdict
 from pprint import pprint
+
+from numpy import product
 
 RUN_TEST = True
 PART = 1
@@ -15,7 +19,41 @@ def main(run_test, part, test_input_path, input_path):
 
 
 def run_part1(input_):
-    pass
+    teaspoons = 100
+    ingredients = get_ingredients(input_)
+    distr = find_optimal_distribution(ingredients, teaspoons)
+    score = compute_score(distr, ingredients)
+    return score
+
+
+def find_optimal_distribution(ingredients, teaspoons):
+    # seed(0)
+    amount1 = 44  # randint(0, 100)
+    amount2 = teaspoons - amount1
+    return {ing: amount for ing, amount in zip(ingredients, [amount1, amount2])}
+
+
+def get_ingredients(input_):
+    ingredients = {}
+    for line in input_:
+        ingredient = line.split(':')[0]
+        matches = (re.finditer(r'(\w+) (-?\d+)', line))
+        ing_dict = {}
+        for match in matches:
+            property, value = match.groups()
+            ing_dict[property] = int(value)
+        ingredients[ingredient] = ing_dict
+    return ingredients
+
+
+def compute_score(distribution, ingredients):
+    property_scores = defaultdict(lambda: 0)
+    for ing, amount in distribution.items():
+        for property, value in ingredients[ing].items():
+            if property == 'calories':
+                continue
+            property_scores[property] += amount * value
+    return product(list(property_scores.values()))
 
 
 def run_part2(input_):
