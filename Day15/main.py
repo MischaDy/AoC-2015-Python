@@ -5,7 +5,7 @@ from pprint import pprint
 from numpy import product
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
@@ -84,7 +84,25 @@ def compute_score(distribution, ingredients):
 
 
 def run_part2(input_):
-    pass
+    teaspoons = 100
+    ingredients = get_ingredients(input_)
+    distr, opt_score = find_optimal_distribution_part2(ingredients, teaspoons)
+    return distr, opt_score
+
+
+def compute_calories(distribution, ingredients):
+    calories = sum(
+        amount * ing['calories']
+        for ing, amount in zip(ingredients.values(), distribution)
+    )
+    return calories
+
+
+def find_optimal_distribution_part2(ingredients, teaspoons):
+    scores = ((distr, compute_score(distr, ingredients))
+              for distr in gen_distributions(len(ingredients.keys()), teaspoons)
+              if compute_calories(distr, ingredients) == 500)
+    return max(scores, key=lambda t: t[1])
 
 
 def get_input(file_path, line_sep=None):
