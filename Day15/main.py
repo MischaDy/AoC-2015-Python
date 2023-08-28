@@ -4,7 +4,7 @@ from pprint import pprint
 
 from numpy import product
 
-RUN_TEST = True
+RUN_TEST = False
 PART = 1
 
 TEST_INPUT_PATH = 'test_input.txt'
@@ -21,16 +21,41 @@ def main(run_test, part, test_input_path, input_path):
 def run_part1(input_):
     teaspoons = 100
     ingredients = get_ingredients(input_)
-    distr = find_optimal_distribution(ingredients, teaspoons)
-    score = compute_score(distr, ingredients)
-    return score
+    distr, opt_score = find_optimal_distribution(ingredients, teaspoons)
+    return distr, opt_score
 
 
 def find_optimal_distribution(ingredients, teaspoons):
-    # seed(0)
-    amount1 = 44  # randint(0, 100)
-    amount2 = teaspoons - amount1
-    return {ing: amount for ing, amount in zip(ingredients, [amount1, amount2])}
+    scores = ((distr, compute_score(distr, ingredients))
+              for distr in gen_distributions(len(ingredients.keys()), teaspoons))
+    return max(scores, key=lambda t: t[1])
+
+
+def gen_distributions(k, total):
+    """
+    generate all possible distributions of an integer total over k items/positions
+
+    order not guaranteed
+    examples:
+        (2, 4) ==> [(4, 0), (3, 1), (2, 2), (1, 3), (0, 4)]
+        (3, 5) ==> [(5, 0, 0),
+                    (4, 1, 0), (4, 0, 1),
+                    (3, 2, 0), (3, 1, 1), (3, 0, 2),
+                    (2, 3, 0), (2, 2, 1), (2, 1, 2), (2, 0, 3),
+                    (1, 4, 0), (1, 3, 1), (1, 2, 2), (1, 1, 3), (1, 0, 4),
+                    (0, 5, 0), (0, 4, 1), (0, 3, 2), (0, 2, 3), (0, 1, 4), (0, 0, 5)]
+
+
+    :param k: number of items to distribute amount over
+    :param total: amount to distribute over k items
+    :return:
+    """
+    if k == 1:
+        yield [total]
+    else:
+        for amount in reversed(range(0, total+1)):
+            for sub_distr in gen_distributions(k-1, total-amount):
+                yield [amount] + sub_distr
 
 
 def get_ingredients(input_):
@@ -48,11 +73,13 @@ def get_ingredients(input_):
 
 def compute_score(distribution, ingredients):
     property_scores = defaultdict(lambda: 0)
-    for ing, amount in distribution.items():
+    for ing, amount in zip(ingredients.keys(), distribution):
         for property, value in ingredients[ing].items():
             if property == 'calories':
                 continue
             property_scores[property] += amount * value
+    if any(map(lambda v: v <= 0, property_scores.values())):
+        return 0
     return product(list(property_scores.values()))
 
 
