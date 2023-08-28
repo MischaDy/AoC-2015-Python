@@ -1,11 +1,25 @@
+import operator
 import re
 from pprint import pprint
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
+
+PRESENT_AUNT_DICT = {
+    "children": 3,
+    "cats": 7,
+    "samoyeds": 2,
+    "pomeranians": 3,
+    "akitas": 0,
+    "vizslas": 0,
+    "goldfish": 5,
+    "trees": 3,
+    "cars": 2,
+    "perfumes": 1,
+}
 
 
 def main(run_test, part, test_input_path, input_path):
@@ -16,19 +30,7 @@ def main(run_test, part, test_input_path, input_path):
 
 
 def run_part1(input_):
-    present_aunt_dict = {
-        "children": 3,
-        "cats": 7,
-        "samoyeds": 2,
-        "pomeranians": 3,
-        "akitas": 0,
-        "vizslas": 0,
-        "goldfish": 5,
-        "trees": 3,
-        "cars": 2,
-        "perfumes": 1,
-    }
-    present_aunt_set = set(present_aunt_dict.items())
+    present_aunt_set = set(PRESENT_AUNT_DICT.items())
     aunts = get_aunts(input_)
     for number, compounds in aunts.items():
         aunt_set = set(compounds.items())
@@ -49,7 +51,19 @@ def get_aunts(input_):
 
 
 def run_part2(input_):
-    pass
+    aunts = get_aunts(input_)
+    for number, compounds in aunts.items():
+        for compound, amount in compounds.items():
+            if compound in ('cats', 'trees'):
+                op = operator.gt
+            elif compound in ('pomeranians', 'goldfish'):
+                op = operator.lt
+            else:
+                op = operator.eq
+            if not op(amount, PRESENT_AUNT_DICT[compound]):
+                break
+        else:
+            return number
 
 
 def get_input(file_path, line_sep=None):
