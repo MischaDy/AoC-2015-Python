@@ -1,3 +1,5 @@
+from pprint import pprint
+
 RUN_TEST = True
 PART = 1
 
@@ -9,7 +11,7 @@ def main(run_test, part, test_input_path, input_path):
     file_path = test_input_path if run_test else input_path
     day_function = run_part1 if part == 1 else run_part2
     input_ = get_input(file_path, line_sep='\n')
-    print(day_function(input_))
+    pprint(day_function(input_))
 
 
 def run_part1(input_):
