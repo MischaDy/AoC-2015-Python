@@ -1,10 +1,10 @@
-from itertools import combinations_with_replacement
+from itertools import combinations_with_replacement, tee
 from pprint import pprint
 
 from more_itertools import powerset, ilen
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
@@ -25,7 +25,14 @@ def run_part1(input_):
 
 
 def run_part2(input_):
-    pass
+    max_amount = 25 if RUN_TEST else 150
+    containers = list(map(int, input_))
+    valid_combos1, valid_combos2 = tee(filter(lambda c: sum(c) == max_amount,
+                                              powerset(containers)),
+                                       2)
+    min_combo_size = min(map(len, valid_combos1))
+    min_combos = filter(lambda c: len(c) == min_combo_size, valid_combos2)
+    return ilen(min_combos)
 
 
 def get_input(file_path, line_sep=None):
