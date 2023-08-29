@@ -1,7 +1,9 @@
 from itertools import combinations_with_replacement
 from pprint import pprint
 
-RUN_TEST = True
+from more_itertools import powerset, ilen
+
+RUN_TEST = False
 PART = 1
 
 TEST_INPUT_PATH = 'test_input.txt'
@@ -18,7 +20,8 @@ def main(run_test, part, test_input_path, input_path):
 def run_part1(input_):
     max_amount = 25 if RUN_TEST else 150
     containers = list(map(int, input_))
-    return combinations_with_replacement(containers)
+    valid_combos = filter(lambda c: sum(c) == max_amount, powerset(containers))
+    return ilen(valid_combos)
 
 
 def run_part2(input_):
