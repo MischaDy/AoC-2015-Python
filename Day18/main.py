@@ -1,10 +1,11 @@
+from itertools import product
 from pprint import pprint
 
 import numpy as np
 from more_itertools import ilen
 
 RUN_TEST = False
-PART = 1
+PART = 2
 
 TEST_INPUT_PATH = 'test_input.txt'
 INPUT_PATH = 'input.txt'
@@ -78,7 +79,22 @@ def print_grid(iteration, grid):
 
 
 def run_part2(input_):
-    pass
+    num_steps = 5 if RUN_TEST else 100
+    grid = build_grid(input_)
+    turn_corners_on(grid)
+    if RUN_TEST:
+        print_grid(0, grid)
+    for iteration in range(1, num_steps+1):
+        grid = compute_next_grid(grid)
+        turn_corners_on(grid)
+        if RUN_TEST:
+            print_grid(iteration, grid)
+    return count_lights_on(grid.flatten())
+
+
+def turn_corners_on(grid):
+    for row, col in product([0, -1], repeat=2):
+        grid[row, col] = 1
 
 
 def get_input(file_path, line_sep=None):
